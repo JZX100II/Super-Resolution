@@ -8,7 +8,6 @@ from torchvision.datasets import CIFAR10
 from torch.utils.data import DataLoader
 
 def add_coord_encoding(xy):
-    # xy is (N, 2) tensor in [-1, 1]
     frequencies = [1, 2, 4, 8, 16]
     embeddings = [xy]
     for freq in frequencies:
@@ -69,17 +68,13 @@ if __name__ == "__main__":
     import torchvision.transforms as T
 
     ds = CIFAR10(root="data", train=True, download=True, transform=T.ToTensor())
-    # img, _ = ds[0]
     random_index = random.randint(0, 8000)
     img, _ = ds[random_index]
     img = img.permute(1, 2, 0) # H, W, C: Height, Width, Color
 
-    # img_tensor = T.ToTensor()(img).permute(1, 2, 0)  # HWC format
 
-    # model = train_texture_model(img_tensor, epochs=500)
     model = train_texture_model(img, epochs=500)
 
-    # base_img = render_texture(model, res=32) # Base image
     base_img, _ = ds[random_index]
     base_img = base_img.permute(1, 2, 0)
     plt.imshow(base_img)
@@ -87,8 +82,6 @@ if __name__ == "__main__":
     plt.axis('off')
     plt.show()
 
-    # out_img = render_texture(model, res=512) # Super Resolution
-    # out_img = render_texture(model, res=1024) # Super Resolution
     out_img = render_texture(model, res=2048) # Super Resolution
     plt.imshow(out_img)
     plt.title("Neural Texture Output")

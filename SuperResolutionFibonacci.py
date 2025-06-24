@@ -5,17 +5,18 @@ import numpy as np
 import matplotlib.pyplot as plt
 import random
 from torchvision.datasets import CIFAR10
+from torch.utils.data import DataLoader
 
-def add_coord_encoding(xy):
-    # xy is (N, 2) tensor in [-1, 1]
+def add_coord_encoding(xy): 
     frequencies = [-13, -8, -5, -3, -2, -1, -1, 1, 1, 2, 3, 5, 8, 13]
+    
     embeddings = [xy]
     for freq in frequencies:
         for fn in [torch.sin, torch.cos]:
             embeddings.append(fn(xy * np.pi * freq))
     return torch.cat(embeddings, dim=-1)
 
-class NeuralTexture(nn.Module):
+class NeuralTexture(nn.Module): 
     def __init__(self, input_dim=2, hidden_dim=128, output_dim=3, layers=4):
         super().__init__()
         net = [nn.Linear(input_dim, hidden_dim), nn.ReLU()]
@@ -72,11 +73,16 @@ if __name__ == "__main__":
     img, _ = ds[random_index]
     img = img.permute(1, 2, 0) # H, W, C: Height, Width, Color
 
-    img_tensor = T.ToTensor()(img).permute(1, 2, 0)  # HWC format
+    model = train_texture_model(img, epochs=2000)
 
-    model = train_texture_model(img_tensor, epochs=500)
+    base_img, _ = ds[random_index]
+    base_img = base_img.permute(1, 2, 0)
+    plt.imshow(base_img)
+    plt.title(f"Base Image {random_index}")
+    plt.axis('off')
+    plt.show()
 
-    out_img = render_texture(model, res=1024)
+    out_img = render_texture(model, res=2048) # Super Resolution
     plt.imshow(out_img)
     plt.title("Neural Texture Output")
     plt.axis('off')
